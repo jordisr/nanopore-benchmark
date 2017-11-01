@@ -7,19 +7,24 @@ ALFRED_PATH = 'alfred_v0.1.2_linux_x86_64bit'
 
 # paths to basecallers
 NANOCALL_PATH = 'nanocall'
+CHIRON_PATH = 'chiron'
 
 # phony targets for running all benchmarks
 .SECONDARY:
-.PHONY : all
-all: nanocall.alignment nanocall.kmer
+.PHONY : all nanocall chiron
 
-.PHONY : clean
-clean:
-	rm nanocall.*
+all: nanocall chiron
+nanocall: nanocall.alignment nanocall.kmer
+chiron: chiron.alignment chiron.kmer
 
 # basecalling (FAST5 => FASTA)
 nanocall.fasta:
 	$(NANOCALL_PATH) -t 8 --1d --pore r9 -o $@ $(READS)
+
+chiron.fasta:
+	$(NANOCALL_PATH) -t 8 -i $(READS) -o chiron
+	python fastq_to_fasta.py chiron/result/
+	cat chiron/result/*.fasta > chiron.fasta
 
 # evaluation: k-mer distribution
 %.kmer: %.fasta
