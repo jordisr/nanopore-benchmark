@@ -9,6 +9,7 @@ def fastq_to_fasta(fastq):
     base = os.path.splitext(fastq)[0]
     print(fastq, base+'.fasta')
     SeqIO.convert(fastq, 'fastq', base+'.fasta', 'fasta')
+    return None
 
 if __name__ == '__main__':
     path = sys.argv[1]

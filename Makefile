@@ -4,6 +4,7 @@ READS=sample_data/
 
 # paths to utilities
 ALFRED_PATH = 'alfred_v0.1.2_linux_x86_64bit'
+JSA_PATH = 'jsa.hts.errorAnalysis'
 
 # paths to basecallers
 NANOCALL_PATH = 'nanocall'
@@ -11,13 +12,17 @@ CHIRON_PATH = 'chiron'
 
 # phony targets for running all benchmarks
 .SECONDARY:
-.PHONY : all nanocall chiron
+.PHONY : all nanocall chiron metrichor
 
-all: nanocall chiron
-nanocall: nanocall.alignment nanocall.kmer
-chiron: chiron.alignment chiron.kmer
+all: nanocall chiron metrichor
+metrichor: metrichor.stat metrichor.kmer
+nanocall: nanocall.stat nanocall.kmer
+chiron: chiron.stat chiron.kmer
 
 # basecalling (FAST5 => FASTA)
+metrichor.fasta:
+	python fast5_to_fasta.py $(READS) > $@
+
 nanocall.fasta:
 	$(NANOCALL_PATH) -t 8 --1d --pore r9 -o $@ $(READS)
 
@@ -39,6 +44,6 @@ chiron.fasta:
 	samtools index $@
 
 # evaluation: alignment accuracy
-%.alignment: %.bam
+%.stat: %.bam
 	$(ALFRED_PATH) qc -r $(REFERENCE) $< -o $(basename $@)
-	date > $@
+	$(JSA_PATH) --bamFile=$< --reference $(REFERENCE) > $@
